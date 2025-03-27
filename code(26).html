@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Integrated Dark Notes</title>
+<!-- Quill CSS -->
+<link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+<!-- DOMPurify (Security) - CORRECTED HASH -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js" integrity="sha512-H+rglffZ6f5gF7UJgvH4Naa+fGCgjrHKMgoFOGmcPTRwR6oILo5R+gtzNrpDp7iMV3udbymBVjkeZGNz1Em4rQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<!-- Quill JS -->
+<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+<style>
+:root{
+    --font:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --radius: 7px;
+    --trans: 0.2s ease-in-out;
+    --sp-sm: 8px; --sp-md: 16px; --sp-lg: 24px; --sp-xl: 32px;
+    /* Refined Dark Theme */
+    --bg1: #1e1e24;
+    --bg2: #282a36;
+    --primary: #8be9fd;
+    --primary-h: #62d6f3;
+    --secondary: #8a93a2;
+    --border: #3a3f51;
+    --text: #f8f8f2;
+    --text-l: #bdc6e0;
+    --shadow-color: rgba(0, 0, 0, 0.15);
+    --input-bg: #2e303e;
+    --focus-ring: color-mix(in srgb, var(--primary) 20%, transparent);
+    /* Note Colors */
+    --c1: #282a36; --c2: #4a463b; --c3: #334d42; --c4: #304a5e; --c5: #5c3846; --c6: #4c3e5a; --c7: #50505a;
+}
+*,::before,::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background-color:var(--bg1);color:var(--text);line-height:1.6;padding:var(--sp-lg)}
+.cont{max-width:1000px;margin:0 auto;padding:0 var(--sp-md)}
+h1{color:var(--primary);text-align:center;margin-bottom:var(--sp-lg);font-weight:500;font-size:clamp(1.5rem,4vw + .7rem,2rem);letter-spacing:-0.5px}
+.form{background:var(--bg2);padding:var(--sp-lg);border-radius:var(--radius);margin-bottom:var(--sp-lg);box-shadow:0 2px 10px var(--shadow-color);border:1px solid var(--border);transition:box-shadow var(--trans),border-color var(--trans)}
+.form.editing{box-shadow:0 0 0 3px var(--primary),0 2px 10px var(--shadow-color)}
+.form-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--sp-md)}
+.form-hdr h2{margin:0;font-weight:500;color:var(--primary);font-size:1.15rem}
+.f-grp{margin-bottom:var(--sp-md)}
+.f-grp label{display:block;margin-bottom:var(--sp-sm);font-weight:400;color:var(--text-l);font-size:.85rem}
+.f-grp label[for="editor-wrapper"] { margin-bottom: 0; }
+.f-ctrl{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius);font-family:inherit;font-size:1rem;background-color:var(--input-bg);color:var(--text);transition:border-color var(--trans),box-shadow var(--trans),background-color var(--trans)}
+.f-ctrl::placeholder{color:var(--secondary)}
+.f-ctrl:focus{outline:0;border-color:var(--primary);box-shadow:0 0 0 3px var(--focus-ring);background-color:var(--bg2)}
+/* --- Integrated Quill Editor Styling --- */
+#editor-wrapper {border: 1px solid var(--border);border-radius: var(--radius);overflow: hidden;background-color: var(--input-bg);transition: border-color var(--trans), box-shadow var(--trans);margin-bottom: var(--sp-md);}
+#editor-wrapper:focus-within {border-color: var(--primary);box-shadow: 0 0 0 3px var(--focus-ring);}
+#editor-container{ height:auto; }
+.ql-toolbar{background: var(--input-bg);border: none !important;padding: 8px 8px;border-bottom: 1px solid var(--border) !important;}
+.ql-container{border: none !important;font-size:.95rem; background-color: var(--input-bg);}
+.ql-editor{color:var(--text);font-family:var(--font);min-height: 150px;padding: 12px 15px;background-color: var(--input-bg);}
+.ql-editor::before{color:var(--secondary);font-style:normal !important;}
+.ql-snow .ql-stroke{stroke:var(--text-l)} .ql-snow .ql-fill{fill:var(--text-l)}
+.ql-snow .ql-picker-label{color:var(--text-l)} .ql-snow .ql-picker-options{background-color:var(--bg2);border-color:var(--border)}
+.ql-snow .ql-picker-item:hover,.ql-snow .ql-picker-item.ql-selected{color:var(--primary)}
+.ql-snow .ql-tooltip{background-color:var(--bg2);border:1px solid var(--border);box-shadow:0 2px 5px var(--shadow-color);color:var(--text)}
+.ql-snow .ql-tooltip input{background-color:var(--input-bg);border:1px solid var(--border);color:var(--text)}
+.ql-snow .ql-tooltip a.ql-action::before{background-color:var(--primary);border-radius:var(--radius)/2;padding:2px 4px;}
+/* --- End Integrated Quill Styling --- */
+.clr-picker{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:var(--sp-sm)}
+.clr-opt{width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid var(--border);transition:transform var(--trans),border-color var(--trans),box-shadow var(--trans)}
+.clr-opt:hover{transform:scale(1.15)}
+.clr-opt.selected{border-color:var(--text);box-shadow:0 0 0 2px var(--bg2),0 0 0 4px var(--primary)}
+.f-act{display:flex;justify-content:flex-end;gap:var(--sp-md);margin-top:var(--sp-md)}
+.btn{padding:8px 16px;border:1px solid transparent;border-radius:var(--radius);cursor:pointer;font-size:.85rem;font-weight:500;transition:all var(--trans);text-decoration:none;display:inline-flex;align-items:center;gap:var(--sp-sm);line-height:1;background-color:var(--primary);color:var(--bg1);box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.btn:hover{background-color:var(--primary-h);box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.btn:active{transform:translateY(1px);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.btn-secondary{background-color:var(--secondary);border-color:var(--secondary);color:var(--bg1)}
+.btn-secondary:hover{background-color:color-mix(in srgb, var(--secondary) 85%, black);border-color:color-mix(in srgb, var(--secondary) 85%, black)}
+.toolbar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:var(--sp-md);margin-bottom:var(--sp-lg);padding:var(--sp-md) var(--sp-md);background:var(--bg2);border-radius:var(--radius);border:1px solid var(--border)}
+#search{flex-grow:1;min-width:180px}
+#sort{padding:8px 10px;border-radius:var(--radius);border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-size:.85rem}
+#notes{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,250px),1fr));gap:var(--sp-lg);padding-bottom:var(--sp-lg)}
+.note{background-color:var(--bg2);border-radius:var(--radius);padding:var(--sp-md);box-shadow:0 1px 6px var(--shadow-color);display:flex;flex-direction:column;transition:all var(--trans);overflow:hidden;border:1px solid var(--border);position:relative; opacity: 0.9;}
+.note:hover{transform:translateY(-3px);box-shadow:0 4px 12px var(--shadow-color); opacity: 1;}
+.n-hdr{flex-grow:1}
+.n-title{font-size:1.1rem;font-weight:500;margin-bottom:var(--sp-sm);color:var(--text);overflow-wrap:break-word;word-wrap:break-word}
+.n-body{flex-grow:1;margin-bottom:var(--sp-md);font-size:.9rem;color:var(--text-l);overflow-wrap:break-word;word-wrap:break-word;max-height:280px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.n-body img{max-width:100%;height:auto;border-radius:var(--radius)/2; margin: var(--sp-sm) 0;}
+.n-body::-webkit-scrollbar{width:5px} .n-body::-webkit-scrollbar-track{background:transparent} .n-body::-webkit-scrollbar-thumb{background-color:var(--border);border-radius:10px}
+.n-ftr{display:flex;justify-content:space-between;align-items:center;font-size:.7rem;color:var(--secondary);margin-top:auto;padding-top:var(--sp-sm);border-top:1px solid var(--border)}
+.n-acts{flex-shrink:0;display:flex;gap:var(--sp-sm)}
+.n-acts button{background:none;border:none;cursor:pointer;padding:3px;color:var(--secondary);transition:color var(--trans);font-size:1rem; line-height: 1;}
+.n-acts button:hover{color:var(--primary)} .n-acts .del:hover{color:#ff79c6}
+#empty{text-align:center;padding:var(--sp-xl) var(--sp-md);color:var(--text-l);font-style:italic}
+@media (max-width:768px){body{padding:var(--sp-md)}.toolbar{flex-direction:column;align-items:stretch}#notes{gap:var(--sp-md)}}
+@media (max-width:480px){h1{font-size:1.4rem}.form{padding:var(--sp-md)}.f-act{flex-direction:column;gap:var(--sp-sm)}.f-act .btn{width:100%;justify-content:center}#notes{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="cont">
+<h1>Integrated Dark Notes</h1>
+<form id="form" class="form">
+<div class="form-hdr">
+<h2 id="form-title">Add Note</h2>
+</div>
+<input type="hidden" id="id">
+<div class="f-grp">
+<label for="title">Title</label>
+<input type="text" id="title" class="f-ctrl" placeholder="Note Title">
+</div>
+<div class="f-grp">
+<label for="editor-wrapper">Content</label>
+<div id="editor-wrapper">
+<div id="editor-container"></div>
+</div>
+<input type="file" id="image-upload" accept="image/*" style="display: none;">
+</div>
+<div class="f-grp">
+<label>Color Tag</label>
+<div id="colors" class="clr-picker"></div>
+</div>
+<div class="f-act">
+<button type="button" id="cancel" class="btn btn-secondary" style="display:none">Cancel</button>
+<button type="submit" id="save" class="btn">Save Note</button>
+</div>
+</form>
+<div class="toolbar">
+<input type="search" id="search" class="f-ctrl" placeholder="Search...">
+<select id="sort" class="f-ctrl" style="width:auto">
+<option value="modTs-desc">Modified (Newest)</option>
+<option value="modTs-asc">Modified (Oldest)</option>
+<option value="title-asc">Title (A-Z)</option>
+<option value="title-desc">Title (Z-A)</option>
+</select>
+</div>
+<div id="notes" data-layout="grid"></div>
+<div id="empty" style="display:none">No notes yet.</div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+    const d=document,gebi=id=>d.getElementById(id);
+    const formEl=gebi('form'),formTitle=gebi('form-title'),idInp=gebi('id'),titleInp=gebi('title'),editorWrapper=gebi('editor-wrapper'), editorContainer=gebi('editor-container'),colorPicker=gebi('colors'),saveBtn=gebi('save'),cancelBtn=gebi('cancel'),searchInp=gebi('search'),sortSel=gebi('sort'),notesCont=gebi('notes'),emptyEl=gebi('empty'),imageUploadInp=gebi('image-upload');
+    let notesStore=[],editId=null,sortVal='modTs-desc',searchVal='';
+    let quill;
+    const NOTE_COLORS=['var(--c1)','var(--c2)','var(--c3)','var(--c4)','var(--c5)','var(--c6)','var(--c7)'];
+    const DEF_COLOR=NOTE_COLORS[0];
+    const STORE_KEY='integratedRichDarkNotes_v2'; // Updated store key just in case
+
+    // --- Quill Setup ---
+    const toolbarOptions=[['bold','italic','underline','strike'],['blockquote','code-block'],[{'header':1},{'header':2}],[{'list':'ordered'},{'list':'bullet'}],[{'indent':'-1'},{'indent':'+1'}],[{'size':['small',false,'large','huge']}],[{'color':[]},{'background':[]}],[{'align':[]}],[{ 'script': 'sub'}, { 'script': 'super' }],['link','image'],['clean']];
+    quill=new Quill(editorContainer,{modules:{toolbar:toolbarOptions},theme:'snow',placeholder:'Start writing your note...'});
+
+    // --- Load & Save ---
+    const loadNotes=()=>{try{const stored=localStorage.getItem(STORE_KEY);notesStore=stored?JSON.parse(stored):[];notesStore.forEach(n=>{n.modTs=n.modTs&&typeof n.modTs==='string'?new Date(n.modTs):new Date(0);n.color=n.color||DEF_COLOR})}catch(e){console.error("Load err:",e);notesStore=[];localStorage.removeItem(STORE_KEY)}};
+    const saveNotes=()=>{try{localStorage.setItem(STORE_KEY,JSON.stringify(notesStore))}catch(e){console.error("Save err:",e);alert("Could not save. LocalStorage might be full due to images.")}};
+    const renderColors=(cont,selClr)=>{cont.innerHTML='';NOTE_COLORS.forEach(cVar=>{const cVal=getComputedStyle(d.documentElement).getPropertyValue(cVar.slice(4,-1)).trim();const opt=d.createElement('div');opt.className='clr-opt';opt.style.backgroundColor=cVal;opt.dataset.color=cVar;if(cVar===selClr)opt.classList.add('selected');opt.addEventListener('click',()=>{cont.querySelector('.selected')?.classList.remove('selected');opt.classList.add('selected')});cont.appendChild(opt)})};
+    const getSelColor=cont=>(cont.querySelector('.selected')?.dataset.color)||DEF_COLOR;
+    const applySortFilter=()=>{let filtered=notesStore;if(searchVal){const term=searchVal.toLowerCase();filtered=filtered.filter(n=>n.title.toLowerCase().includes(term)||n.content?.toLowerCase().includes(term))}
+    filtered.sort((a,b)=>{switch(sortVal){case'modTs-asc':return a.modTs-b.modTs;case'title-asc':return a.title.localeCompare(b.title);case'title-desc':return b.title.localeCompare(a.title);default:return b.modTs-a.modTs}});renderNotes(filtered)};
+    const renderNotes=notesToRender=>{notesCont.innerHTML='';const hasNotes=notesToRender.length>0;emptyEl.style.display=hasNotes?'none':'block';notesCont.style.display=hasNotes?'grid':'none';notesToRender.forEach(n=>notesCont.appendChild(createNoteEl(n)))};
+    const createNoteEl=note=>{const div=d.createElement('div');div.className='note';div.dataset.id=note.id;div.style.backgroundColor=note.color?`var(${note.color.slice(4,-1)})`:null;
+    // Ensure DOMPurify is available before using it
+    const sanitizedContent = typeof DOMPurify !== 'undefined'
+        ? DOMPurify.sanitize(note.content||'',{USE_PROFILES:{html:true}})
+        : (note.content || ''); // Fallback if DOMPurify somehow fails to load (shouldn't happen with correct hash)
+
+    div.innerHTML=`<div class="n-hdr"><div class="n-title"></div></div><div class="n-body">${sanitizedContent}</div><div class="n-ftr"><span></span><div class="n-acts"><button class="edit" title="Edit">✎</button><button class="del" title="Delete">🗑️</button></div></div>`;div.querySelector('.n-title').textContent=note.title;div.querySelector('.n-ftr span').textContent=formatDate(note.modTs);div.querySelector('.edit').addEventListener('click',()=>handleEdit(note.id));div.querySelector('.del').addEventListener('click',()=>handleDelete(note.id));return div};
+    const handleSave=e=>{e.preventDefault();const title=titleInp.value.trim()||"Untitled";const contentHTML=quill.root.innerHTML;const color=getSelColor(colorPicker);const now=new Date();if(contentHTML==='<p><br></p>'&&title==="Untitled"){alert('Cannot save empty note.');return}
+    if(editId){const idx=notesStore.findIndex(n=>n.id===editId);if(idx>-1)notesStore[idx]={...notesStore[idx],title,content:contentHTML,color,modTs:now}}else{notesStore.push({id:Date.now(),title,content:contentHTML,color,modTs:now})}saveNotes();resetForm();applySortFilter()};
+    const handleEdit=id=>{const note=notesStore.find(n=>n.id===id);if(!note)return;editId=id;idInp.value=note.id;titleInp.value=note.title==="Untitled"?"":note.title;
+     // Ensure DOMPurify is available before using it
+    const sanitizedContent = typeof DOMPurify !== 'undefined'
+        ? DOMPurify.sanitize(note.content||'',{USE_PROFILES:{html:true}})
+        : (note.content || ''); // Fallback
+    quill.root.innerHTML=sanitizedContent;
+    renderColors(colorPicker,note.color||DEF_COLOR);formEl.classList.add('editing');formTitle.textContent='Edit Note';saveBtn.textContent='Update Note';cancelBtn.style.display='inline-block';formEl.scrollIntoView({behavior:'smooth',block:'nearest'});titleInp.focus()};
+    const handleDelete=id=>{const noteTitle=notesStore.find(n=>n.id===id)?.title||'this note';if(confirm(`Delete "${noteTitle}"?`)){notesStore=notesStore.filter(n=>n.id!==id);saveNotes();if(editId===id)resetForm();applySortFilter()}};
+    const resetForm=()=>{editId=null;formEl.reset();idInp.value='';quill.root.innerHTML='<p><br></p>';
+    formEl.classList.remove('editing');formTitle.textContent='Add Note';saveBtn.textContent='Save Note';cancelBtn.style.display='none';renderColors(colorPicker,DEF_COLOR)};
+    const formatDate=d=>(!(d instanceof Date)||isNaN(d))?'?':d.toLocaleString(undefined,{dateStyle:'short',timeStyle:'short'});
+    const handleImageUpload=()=>{imageUploadInp.click()};
+    const insertImage=(e)=>{const file=e.target.files[0];if(!file||!file.type.startsWith('image/'))return;const reader=new FileReader();reader.onload=evt=>{const base64Image=evt.target.result;const range=quill.getSelection(true)||{index:0};
+    quill.insertEmbed(range.index,'image',base64Image,'user');quill.setSelection(range.index+1)};reader.onerror=()=>alert('Error reading image file.');reader.readAsDataURL(file);e.target.value=null};
+    quill.getModule('toolbar').addHandler('image',handleImageUpload);
+    imageUploadInp.addEventListener('change',insertImage);
+
+    // --- Init ---
+    const init=()=>{loadNotes();renderColors(colorPicker,DEF_COLOR);formEl.addEventListener('submit',handleSave);cancelBtn.addEventListener('click',resetForm);let searchTimeout;searchInp.addEventListener('input',()=>{clearTimeout(searchTimeout);searchTimeout=setTimeout(()=>{searchVal=searchInp.value;applySortFilter()},300)});sortSel.addEventListener('change',e=>{sortVal=e.target.value;applySortFilter()});applySortFilter()};
+    init();
+});
+</script>
+</body>
+</html>
